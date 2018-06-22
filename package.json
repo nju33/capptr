@@ -1,0 +1,25 @@
+{
+  "name": "capptr",
+  "version": "0.0.0",
+  "main": "index.js",
+  "bin": {
+    "capptr": "src/cli.js"
+  },
+  "files": [
+    "src",
+    "index.js"
+  ],
+  "repository": "nju33/capptr.git",
+  "author": "nju33 <nju33.ki@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "filenamify-url": "^1.0.0",
+    "fs-extra": "^6.0.1",
+    "puppeteer": "^1.5.0",
+    "ramda": "^0.25.0",
+    "yargs": "^11.0.0"
+  },
+  "devDependencies": {
+    "prettier": "^1.13.5"
+  }
+}
