@@ -4,20 +4,10 @@ const path = require('path');
 const yargs = require('yargs');
 const R = require('ramda');
 const puppeteer = require('puppeteer');
+const Listr = require('listr');
 const filenamifyUrl = require('filenamify-url');
 
 const argv = yargs
-  .command(
-    `
-$0
-  -o /tmp/capptr
-  -u http://example.com
-  -u http://example.com/foo
-  -v 1366x768
-  -v 320x480
-`.trim(),
-    'In the above, Capptr will create example.com:320x480.png, example.com:1366x768.png, example.com!foo:320x480.png and example.com!foo:1366x768.png'
-  )
   .option('urls', {
     alias: 'u',
     type: 'array',
@@ -67,21 +57,57 @@ const run = async () => {
 
   await fs.ensureDir(outDir);
 
-  for (const url of urls) {
-    await page.goto(url);
+  const tasks = new Listr(
+    urls.map(url => {
+      return {
+        title: url,
+        task: async () => {
+          return new Listr(
+            viewports.map((viewport, i) => {
+              return {
+                title: `${viewport.width}x${viewport.height}`,
+                task: async () => {
+                  if (i === 0) {
+                    await page.goto(url);
+                  }
 
-    for (const viewport of viewports) {
-      await page.setViewport(viewport);
-      await page.screenshot({
-        path: path.join(
-          outDir,
-          `${filenamifyUrl(url)}:${viewport.width}x${viewport.height}.png`
-        ),
-        fullPage: true
-      });
-    }
-  }
+                  await page.setViewport(viewport);
+                  await page.screenshot({
+                    path: path.join(
+                      outDir,
+                      `${filenamifyUrl(url)}_${viewport.width}x${
+                        viewport.height
+                      }.png`
+                    ),
+                    type: 'png',
+                    fullPage: true
+                  });
+                }
+              };
+            })
+          );
+        }
+      };
+    })
+  );
 
+  // for (const url of urls) {
+  //   await page.goto(url);
+
+  //   for (const viewport of viewports) {
+  //     await page.setViewport(viewport);
+  //     await page.screenshot({
+  //       path: path.join(
+  //         outDir,
+  //         `${filenamifyUrl(url)}.png?size=${viewport.width}x${viewport.height}`
+  //       ),
+  //       type: 'png',
+  //       fullPage: true
+  //     });
+  //   }
+  // }
+
+  await tasks.run();
   await browser.close();
 };
 
