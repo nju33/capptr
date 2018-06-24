@@ -1,5 +1,10 @@
 {
   "name": "capptr",
+  "description": "To capture a web page with Puppeteer",
+  "keywords": [
+    "capture",
+    "cli"
+  ],
   "version": "0.0.1",
   "main": "index.js",
   "bin": {
